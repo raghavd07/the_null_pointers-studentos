@@ -13,6 +13,17 @@ router.post('/',async(req,res)=>{
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.7,
             max_tokens: 1024,
-        })
+        });
+        const aiInsight=completion.choices[0].message.content;
+        res.json({
+            success:true,
+            logicResult,
+            aiInsight,
+        });
+    } catch(error){
+        console.error('Analyse Error:',error.message);
+        res.status(500).json({success:false,error:error.message});
+
     }
-})
+});
+module.exports=router;
