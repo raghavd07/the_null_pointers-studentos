@@ -1,27 +1,41 @@
-const express=require('express');
-const cors=require('cors');
-const helmet=require('helmet');
-const morgan=require('morgan');
-const dotenv=require('dotenv');
-const connectDB=require('./config/db');
-dotenv.config();
-connectDB();
-const app=express();
+const express = require('express');
+const router = express.Router();
+const { runLogicEngine } = require('../engine/logicEngine');
 
+router.post('/', async (req, res) => {
+  try {
+    const studentData = req.body;
+    const logicResult = runLogicEngine(studentData);
 
-app.use(helmet());
-app.use(cors({origin:'http://localhost:3000'}));
-app.use(morgan('dev'));
-app.use(express.json());
+    const { attendance, cgpa, stress, dailyPerformanceScore, placementReadiness } = logicResult;
 
-app.use('analyze-student',require('./routes/analyze'));
-app.use('generate-plan',require('.routes/plan'));
-app.use('/predict-risk',require('./routes.risk'));
-app.use('/chat',require('./routes/chat'));
+    // Compute overall risk level
+    let overallRisk = 'LOW';
+    const highRiskCount = [
+      attendance.status === 'CRITICAL',
+      cgpa.backlogRisk === 'HIGH',
+      stress.burnoutRisk === 'HIGH',
+    ].filter(Boolean).length;
 
-app.get('/',(req,res)=>{
-    res.json({message:'StudentOS API is Running'});
+    if (highRiskCount >= 2) overallRisk = 'HIGH';
+    else if (highRiskCount === 1 || stress.burnoutRisk === 'MEDIUM') overallRisk = 'MEDIUM';
+
+    res.json({
+      success: true,
+      overallRisk,
+      breakdown: {
+        attendanceRisk: attendance.status,
+        backlogRisk: cgpa.backlogRisk,
+        burnoutRisk: stress.burnoutRisk,
+        dailyPerformanceScore,
+        placementReadiness,
+      },
+    });
+
+  } catch (error) {
+    console.error('Risk error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-const PORT=process.env.PORT;
-app.listen(PORT,()=>console.log(`Server Running on PORT ${PORT}`));
+module.exports = router;
