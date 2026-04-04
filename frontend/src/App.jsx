@@ -1,20 +1,12 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { getUser } from './utils/storage'
+import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import Onboarding from './pages/Onboarding'
-import { useStudent } from './context/StudentContext'
-import './App.css'
 
 export default function App() {
-  const { studentData } = useStudent()
-  const [started, setStarted] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(!!getUser())
 
-  return (
-    <div className="app">
-      {!started
-        ? <Onboarding onStart={() => setStarted(true)} />
-        : <Dashboard />
-      }
-    </div>
-  )
+  return loggedIn
+    ? <Dashboard onLogout={() => setLoggedIn(false)} />
+    : <Login onLogin={() => setLoggedIn(true)} />
 }
