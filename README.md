@@ -75,12 +75,6 @@ StudentOS is an intelligent student productivity system designed to help college
 - Secure API communication
 
 
-API Endpoints:
-
-Method  |  Route        |	Description
-POST	  |/auth/login    | User login
-POST	  |/chat	        |AI analysis
-POST	  |/generate-plan |	Study plan generation
 📦 Data Flow
 User inputs data (attendance, CGPA, etc.)
 Data stored in localStorage
