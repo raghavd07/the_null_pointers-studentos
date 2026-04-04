@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBookOpen,
-  faSparkles,
   faChartSimple,
   faBrain,
-  faTriangleExclamation
+  faTriangleExclamation,
+  faWandMagicSparkles
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function StudyPlan() {
@@ -225,7 +225,7 @@ export default function StudyPlan() {
           gap: "0.5rem",
         }}
       >
-        <FontAwesomeIcon icon={faSparkles} />
+        <FontAwesomeIcon icon={faWandMagicSparkles} />
         {loading ? "Generating Plan..." : "Generate My Study Plan"}
       </motion.button>
 
@@ -271,7 +271,7 @@ export default function StudyPlan() {
                 gap: "0.4rem",
               }}
             >
-              <FontAwesomeIcon icon={faSparkles} style={{ color: "#f59e0b" }} />
+              <FontAwesomeIcon icon={faWandMagicSparkles} style={{ color: "#f59e0b" }} />
               YOUR PERSONALISED PLAN (GROQ AI)
             </div>
 
