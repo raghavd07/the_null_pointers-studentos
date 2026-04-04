@@ -95,7 +95,7 @@ Prepare better for placements
 📅 Calendar integration
 📈 Progress tracking over time
 👨‍💻 Authors
-Raghav Damera
-Eshwanth Bharatwaj Pendyala
-Jayakrishna Rayarakula
-Sai Charith Reddy Chekuri
+Raghav Damera <br>
+Eshwanth Bharatwaj Pendyala <br>
+Jayakrishna Rayarakula <br>
+Sai Charith Reddy Chekuri <br>
