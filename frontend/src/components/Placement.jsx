@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBriefcase, faChartLine, faRobot } from "@fortawesome/free-solid-svg-icons";
 
 export default function Placement() {
   const [form, setForm] = useState({
@@ -15,9 +17,14 @@ export default function Placement() {
   const [loading, setLoading] = useState(false);
 
   const inputStyle = {
-    width: "100%", padding: "0.6rem 0.8rem", borderRadius: 8,
-    background: "#0f172a", border: "1px solid #1e3a5f",
-    color: "#e2e8f0", fontSize: "0.9rem", outline: "none",
+    width: "100%",
+    padding: "0.6rem 0.8rem",
+    borderRadius: 8,
+    background: "#0f172a",
+    border: "1px solid #1e3a5f",
+    color: "#e2e8f0",
+    fontSize: "0.9rem",
+    outline: "none",
     boxSizing: "border-box",
   };
 
@@ -31,7 +38,6 @@ export default function Placement() {
     const projects = parseInt(form.projects);
     const certifications = parseInt(form.certifications);
 
-    // Rule-based score
     let score = 0;
     if (cgpa >= 8.5) score += 30;
     else if (cgpa >= 7.5) score += 22;
@@ -55,25 +61,35 @@ export default function Placement() {
     else readiness = "LOW";
 
     const data = {
-      ...form, score, readiness, skillList,
-      cgpa, backlogs, internships, projects, certifications,
+      ...form,
+      score,
+      readiness,
+      skillList,
+      cgpa,
+      backlogs,
+      internships,
+      projects,
+      certifications,
     };
+
     localStorage.setItem("studentos_placement", JSON.stringify(data));
 
-    // Groq AI suggestion
+    // ✅ AI CALL (fixed)
     let aiSuggestion = "";
     try {
-      const res = await fetch("http://localhost:5000/analyze-student", {
+      const res = await fetch("http://127.0.0.1:5000/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          cgpa, backlogs, internships, projects,
-          skills: skillList, certifications,
-          targetRole: form.targetRole,
+          message: "Analyze this student's placement readiness and give specific advice.",
+          context: data,
         }),
       });
+
       const json = await res.json();
-      aiSuggestion = json.suggestion || json.message || "";
+      aiSuggestion = json.reply || "";
     } catch (e) {
       aiSuggestion = "AI insight unavailable. Check backend connection.";
     }
@@ -82,8 +98,17 @@ export default function Placement() {
     setLoading(false);
   };
 
-  const colors = { HIGH: "#22c55e", MODERATE: "#f59e0b", LOW: "#ef4444" };
-  const bgs = { HIGH: "rgba(34,197,94,0.08)", MODERATE: "rgba(245,158,11,0.08)", LOW: "rgba(239,68,68,0.08)" };
+  const colors = {
+    HIGH: "#22c55e",
+    MODERATE: "#f59e0b",
+    LOW: "#ef4444",
+  };
+
+  const bgs = {
+    HIGH: "rgba(34,197,94,0.08)",
+    MODERATE: "rgba(245,158,11,0.08)",
+    LOW: "rgba(239,68,68,0.08)",
+  };
 
   const fields = [
     { label: "CGPA", key: "cgpa", placeholder: "e.g. 8.2" },
@@ -95,117 +120,167 @@ export default function Placement() {
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 0" }}>
-      <h2 style={{ color: "#93c5fd", fontWeight: 700, fontSize: "1.3rem", marginBottom: "1.5rem" }}>
-        💼 Placement Readiness
+      
+      {/* Header */}
+      <h2 style={{
+        color: "#93c5fd",
+        fontWeight: 700,
+        fontSize: "1.3rem",
+        marginBottom: "1.5rem",
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+      }}>
+        <FontAwesomeIcon icon={faBriefcase} />
+        Placement Readiness
       </h2>
 
+      {/* Inputs */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
         {fields.map(({ label, key, placeholder }) => (
           <div key={key}>
-            <label style={{ fontSize: "0.75rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>{label}</label>
+            <label style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{label}</label>
             <input
               type="number"
               placeholder={placeholder}
               value={form[key]}
-              onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+              onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
               style={inputStyle}
             />
           </div>
         ))}
       </div>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={{ fontSize: "0.75rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>
-          Skills (comma separated)
-        </label>
-        <input
-          type="text"
-          placeholder="e.g. React, Python, SQL"
-          value={form.skills}
-          onChange={e => setForm(f => ({ ...f, skills: e.target.value }))}
-          style={inputStyle}
-        />
-      </div>
+      <input
+        type="text"
+        placeholder="Skills (React, Python...)"
+        value={form.skills}
+        onChange={(e) => setForm(f => ({ ...f, skills: e.target.value }))}
+        style={{ ...inputStyle, marginBottom: "1rem" }}
+      />
 
-      <div style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontSize: "0.75rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>
-          Target Role (optional)
-        </label>
-        <input
-          type="text"
-          placeholder="e.g. SDE, Data Analyst"
-          value={form.targetRole}
-          onChange={e => setForm(f => ({ ...f, targetRole: e.target.value }))}
-          style={inputStyle}
-        />
-      </div>
+      <input
+        type="text"
+        placeholder="Target Role (optional)"
+        value={form.targetRole}
+        onChange={(e) => setForm(f => ({ ...f, targetRole: e.target.value }))}
+        style={{ ...inputStyle, marginBottom: "1.5rem" }}
+      />
 
+      {/* Button */}
       <motion.button
         whileTap={{ scale: 0.97 }}
         onClick={analyze}
         disabled={loading}
         style={{
-          width: "100%", padding: "0.75rem", borderRadius: 8,
+          width: "100%",
+          padding: "0.75rem",
+          borderRadius: 8,
           background: loading ? "#1e3a5f" : "linear-gradient(135deg, #1d4ed8, #2563eb)",
-          color: "#fff", fontWeight: 600, border: "none",
-          cursor: loading ? "not-allowed" : "pointer", fontSize: "0.95rem",
-          marginBottom: "1.5rem",
+          color: "#fff",
+          fontWeight: 600,
+          border: "none",
+          cursor: loading ? "not-allowed" : "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.5rem",
         }}
       >
-        {loading ? "Analyzing with AI..." : "Analyze Readiness"}
+        <FontAwesomeIcon icon={faChartLine} />
+        {loading ? "Analyzing..." : "Analyze Readiness"}
       </motion.button>
 
       <AnimatePresence>
         {result && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Score card */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+
+            {/* ✅ RESTORED NICE UI */}
             <div style={{
-              borderRadius: 12, padding: "1.25rem", marginBottom: "1rem",
+              borderRadius: 12,
+              padding: "1.25rem",
+              marginTop: "1.5rem",
               background: bgs[result.readiness],
               border: `1px solid ${colors[result.readiness]}33`,
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "0.75rem"
+              }}>
                 <span style={{
-                  background: colors[result.readiness], color: "#000",
-                  fontWeight: 700, fontSize: "0.7rem", padding: "2px 10px",
-                  borderRadius: 99, letterSpacing: 1,
+                  background: colors[result.readiness],
+                  color: "#000",
+                  fontWeight: 700,
+                  fontSize: "0.7rem",
+                  padding: "2px 10px",
+                  borderRadius: 99,
+                  letterSpacing: 1,
                 }}>
                   {result.readiness} READINESS
                 </span>
-                <span style={{ color: colors[result.readiness], fontWeight: 800, fontSize: "1.5rem" }}>
+
+                <span style={{
+                  color: colors[result.readiness],
+                  fontWeight: 800,
+                  fontSize: "1.5rem"
+                }}>
                   {result.score}/100
                 </span>
               </div>
 
-              {/* Score bar */}
-              <div style={{ background: "#0f172a", borderRadius: 99, height: 8, overflow: "hidden" }}>
+              <div style={{
+                background: "#0f172a",
+                borderRadius: 99,
+                height: 8,
+                overflow: "hidden"
+              }}>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${result.score}%` }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  style={{ height: "100%", background: colors[result.readiness], borderRadius: 99 }}
+                  transition={{ duration: 0.8 }}
+                  style={{
+                    height: "100%",
+                    background: colors[result.readiness],
+                    borderRadius: 99
+                  }}
                 />
               </div>
             </div>
 
-            {/* AI Suggestion */}
+            {/* AI */}
             {result.aiSuggestion && (
               <div style={{
-                borderRadius: 12, padding: "1.25rem",
-                background: "rgba(15,23,42,0.9)", border: "1px solid #1e3a5f",
+                borderRadius: 12,
+                padding: "1.25rem",
+                marginTop: "1rem",
+                background: "rgba(15,23,42,0.9)",
+                border: "1px solid #1e3a5f",
               }}>
-                <div style={{ fontSize: "0.72rem", color: "#64748b", marginBottom: "0.6rem", letterSpacing: 1 }}>
-                  ✨ AI INSIGHT (GROQ)
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  fontSize: "0.75rem",
+                  color: "#64748b",
+                  marginBottom: "0.6rem",
+                }}>
+                  <FontAwesomeIcon icon={faRobot} />
+                  AI Insight
                 </div>
-                <p style={{ color: "#cbd5e1", fontSize: "0.88rem", lineHeight: 1.65, margin: 0 }}>
+
+                <p style={{
+                  color: "#cbd5e1",
+                  fontSize: "0.88rem",
+                  lineHeight: 1.6,
+                  margin: 0
+                }}>
                   {result.aiSuggestion}
                 </p>
               </div>
             )}
+
           </motion.div>
         )}
       </AnimatePresence>

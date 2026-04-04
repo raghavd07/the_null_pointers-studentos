@@ -7,20 +7,31 @@ router.post('/', async (req, res) => {
     const { message, context } = req.body;
 
     const systemPrompt = `
-You are StudentOS, an AI academic advisor for college students in India.
-You help with study plans, attendance decisions, exam stress, and career guidance.
-Be concise, honest, and supportive. Never make up data.
-${context ? `Student context: ${JSON.stringify(context)}` : ''}
-    `.trim();
+You are StudentOS, an AI placement mentor.
 
+Write a short, natural paragraph (4–5 lines max) explaining:
+- current placement readiness
+- key strengths
+- key weaknesses
+- what the student should do next
+
+RULES:
+- Write like a mentor, not a report
+- No headings (NO SUMMARY, NO BULLETS)
+- No markdown symbols (*, -)
+- Keep it under 100 words
+- Keep it clear and direct
+
+${context ? `Student context: ${JSON.stringify(context)}` : ''}
+`.trim();
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: message },
+        { role: 'user', content: message || "Give placement advice." },
       ],
-      temperature: 0.7,
-      max_tokens: 512,
+      temperature: 0.5, // 🔥 slightly lower = more controlled output
+      max_tokens: 200,  // 🔥 prevents long essays
     });
 
     res.json({
@@ -34,4 +45,4 @@ ${context ? `Student context: ${JSON.stringify(context)}` : ''}
   }
 });
 
-module.exports = router;
+module.exports = router;  

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarCheck } from "@fortawesome/free-solid-svg-icons";
 
 export default function Attendance() {
   const [form, setForm] = useState({ attended: "", total: "", upcoming: "", target: "75" });
@@ -47,7 +49,8 @@ export default function Attendance() {
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: "1.5rem 0" }}>
       <h2 style={{ color: "#93c5fd", fontWeight: 700, fontSize: "1.3rem", marginBottom: "1.5rem" }}>
-        📋 Attendance Tracker
+        <FontAwesomeIcon icon={faCalendarCheck} style={{ marginRight: "0.5rem" }} />
+        Attendance Tracker
       </h2>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>

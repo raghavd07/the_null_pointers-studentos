@@ -1,5 +1,11 @@
 function buildAnalysisPrompt(studentData, logicResult) {
-  const { attendance, cgpa, stress, dailyPerformanceScore, placementReadiness } = logicResult;
+  const {
+    attendance = {},
+    cgpa = {},
+    stress = {},
+    dailyPerformanceScore = 0,
+    placementReadiness = "UNKNOWN",
+  } = logicResult || {};
 
   return `
 You are StudentOS, an intelligent academic advisor for college students in India.
@@ -7,31 +13,31 @@ You have already received computed data from the logic engine. Do NOT make up nu
 Use ONLY the data provided below to generate insights.
 
 == STUDENT PROFILE ==
-Name: ${studentData.name}
-Semester: ${studentData.semester}
-Days to Exam: ${studentData.daysToExam}
+Name: ${studentData?.name || "Student"}
+Semester: ${studentData?.semester ?? "N/A"}
+Days to Exam: ${studentData?.daysToExam ?? "N/A"}
 
 == ATTENDANCE ==
-Current: ${attendance.currentPercentage}%
-Target: ${attendance.targetAttendance}%
-Status: ${attendance.status}
-System Message: ${attendance.message}
+Current: ${attendance.currentPercentage ?? "N/A"}%
+Target: ${attendance.targetAttendance ?? "N/A"}%
+Status: ${attendance.status ?? "N/A"}
+System Message: ${attendance.message ?? "N/A"}
 
 == ACADEMICS ==
-Projected CGPA: ${cgpa.projectedCGPA}
-Total Credits: ${cgpa.totalCredits}
-Backlog Risk: ${cgpa.backlogRisk}
-Failing Subjects: ${cgpa.failingSubjects}
+Projected CGPA: ${cgpa.projectedCGPA ?? "N/A"}
+Total Credits: ${cgpa.totalCredits ?? "N/A"}
+Backlog Risk: ${cgpa.backlogRisk ?? "N/A"}
+Failing Subjects: ${cgpa.failingSubjects ?? 0}
 
 == LIFESTYLE ==
-Study Hours/Day: ${studentData.studyHoursPerDay}
-Sleep Hours/Day: ${studentData.sleepHoursPerDay}
+Study Hours/Day: ${studentData?.studyHoursPerDay ?? "N/A"}
+Sleep Hours/Day: ${studentData?.sleepHoursPerDay ?? "N/A"}
 
 == STRESS ANALYSIS ==
-Stress Score: ${stress.stressScore}/100
-Stress Level: ${stress.stressLevel}
-Burnout Risk: ${stress.burnoutRisk}
-Key Factors: ${stress.stressFactors.join(', ')}
+Stress Score: ${stress.stressScore ?? "N/A"}/100
+Stress Level: ${stress.stressLevel ?? "N/A"}
+Burnout Risk: ${stress.burnoutRisk ?? "N/A"}
+Key Factors: ${(stress.stressFactors || []).join(', ') || "None"}
 
 == PERFORMANCE ==
 Daily Performance Score: ${dailyPerformanceScore}/100
@@ -39,6 +45,7 @@ Placement Readiness: ${placementReadiness}
 
 == YOUR TASK ==
 Write a short, honest, personalized academic report for this student.
+
 Structure your response in exactly this format:
 
 OVERVIEW:
@@ -57,18 +64,27 @@ Keep the tone direct, like a mentor. Not robotic. Not overly positive.
 `.trim();
 }
 
+
 function buildStudyPlanPrompt(studentData, logicResult) {
-  const { cgpa, stress } = logicResult;
+  const { cgpa = {}, stress = {} } = logicResult || {};
+
+  // ✅ SAFE SUBJECT HANDLING (fixes your crash)
+  const subjectsText =
+    studentData?.subjects?.length
+      ? studentData.subjects
+          .map(s => `${s.name} (${s.expectedGrade})`)
+          .join(', ')
+      : "No subject data available";
 
   return `
 You are StudentOS. Generate a realistic 7-day study plan for this student.
 
 == CONTEXT ==
-Days to Exam: ${studentData.daysToExam}
-Study Hours Available Per Day: ${studentData.studyHoursPerDay}
-Stress Level: ${stress.stressLevel}
-Projected CGPA: ${cgpa.projectedCGPA}
-Subjects: ${studentData.subjects.map(s => `${s.name} (${s.expectedGrade})`).join(', ')}
+Days to Exam: ${studentData?.daysToExam ?? "N/A"}
+Study Hours Available Per Day: ${studentData?.studyHoursPerDay ?? "N/A"}
+Stress Level: ${stress.stressLevel ?? "N/A"}
+Projected CGPA: ${cgpa.projectedCGPA ?? "N/A"}
+Subjects: ${subjectsText}
 
 == RULES ==
 - Prioritize subjects where expected grade is low (C or F)

@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGraduationCap, faPlus, faCalculator } from "@fortawesome/free-solid-svg-icons";
 
 export default function CGPA() {
   const [subjects, setSubjects] = useState([{ name: "", grade: "", credits: "" }]);
   const [result, setResult] = useState(null);
 
-  const gradePoints = { "O": 10, "A+": 9, "A": 8, "B+": 7, "B": 6, "C": 5, "F": 0 };
+  const gradePoints = {
+    "S": 10,
+    "A": 9,
+    "B": 8,
+    "C": 7,
+    "D": 6,
+    "E": 5,
+    "P": 4,
+    "F": 0
+  };
 
   const addSubject = () => setSubjects(s => [...s, { name: "", grade: "", credits: "" }]);
   const removeSubject = (i) => setSubjects(s => s.filter((_, idx) => idx !== i));
@@ -21,6 +32,7 @@ export default function CGPA() {
       totalCredits += cr;
       return { ...sub, gp };
     });
+
     const cgpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00";
     const data = { cgpa, totalCredits, breakdown };
     localStorage.setItem("studentos_cgpa", JSON.stringify(data));
@@ -41,8 +53,11 @@ export default function CGPA() {
 
   return (
     <div style={{ maxWidth: 580, margin: "0 auto", padding: "1.5rem 0" }}>
-      <h2 style={{ color: "#93c5fd", fontWeight: 700, fontSize: "1.3rem", marginBottom: "1.5rem" }}>
-        🎓 CGPA Calculator
+      
+      {/* Header */}
+      <h2 style={{ color: "#93c5fd", fontWeight: 700, fontSize: "1.3rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <FontAwesomeIcon icon={faGraduationCap} />
+        CGPA Calculator
       </h2>
 
       {/* Header row */}
@@ -54,13 +69,20 @@ export default function CGPA() {
 
       {/* Subject rows */}
       {subjects.map((sub, i) => (
-        <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1fr auto", gap: "0.5rem", marginBottom: "0.5rem", alignItems: "center" }}>
+        <div key={i} style={{
+          display: "grid",
+          gridTemplateColumns: "2fr 1.2fr 1fr auto",
+          gap: "0.5rem",
+          marginBottom: "0.5rem",
+          alignItems: "center"
+        }}>
           <input
             placeholder="e.g. Maths"
             value={sub.name}
             onChange={e => update(i, "name", e.target.value)}
             style={inputStyle}
           />
+
           <select
             value={sub.grade}
             onChange={e => update(i, "grade", e.target.value)}
@@ -71,6 +93,7 @@ export default function CGPA() {
               <option key={g} value={g}>{g} ({gradePoints[g]})</option>
             ))}
           </select>
+
           <input
             type="number"
             placeholder="Cr"
@@ -78,41 +101,71 @@ export default function CGPA() {
             onChange={e => update(i, "credits", e.target.value)}
             style={inputStyle}
           />
+
           <button
             onClick={() => removeSubject(i)}
             disabled={subjects.length === 1}
             style={{
-              background: "transparent", border: "none", color: "#ef4444",
+              background: "transparent",
+              border: "none",
+              color: "#ef4444",
               cursor: subjects.length === 1 ? "not-allowed" : "pointer",
-              fontSize: "1rem", opacity: subjects.length === 1 ? 0.3 : 1,
+              fontSize: "1rem",
+              opacity: subjects.length === 1 ? 0.3 : 1,
             }}
-          >✕</button>
+          >
+            ✕
+          </button>
         </div>
       ))}
 
       {/* Controls */}
       <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.75rem", marginBottom: "1.5rem" }}>
+        
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={addSubject}
           style={{
-            flex: 1, padding: "0.65rem", borderRadius: 8,
-            background: "#0f172a", border: "1px solid #1e3a5f",
-            color: "#93c5fd", fontWeight: 600, cursor: "pointer", fontSize: "0.9rem",
+            flex: 1,
+            padding: "0.65rem",
+            borderRadius: 8,
+            background: "#0f172a",
+            border: "1px solid #1e3a5f",
+            color: "#93c5fd",
+            fontWeight: 600,
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem"
           }}
         >
-          + Add Subject
+          <FontAwesomeIcon icon={faPlus} />
+          Add Subject
         </motion.button>
+
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={calculate}
           style={{
-            flex: 1, padding: "0.65rem", borderRadius: 8,
+            flex: 1,
+            padding: "0.65rem",
+            borderRadius: 8,
             background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-            color: "#fff", fontWeight: 600, border: "none", cursor: "pointer", fontSize: "0.9rem",
+            color: "#fff",
+            fontWeight: 600,
+            border: "none",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem"
           }}
         >
-          Calculate CGPA
+          <FontAwesomeIcon icon={faCalculator} />
+          Calculate
         </motion.button>
       </div>
 
@@ -124,13 +177,21 @@ export default function CGPA() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             style={{
-              borderRadius: 12, padding: "1.25rem",
-              background: "rgba(15,23,42,0.8)", border: "1px solid #1e3a5f",
+              borderRadius: 12,
+              padding: "1.25rem",
+              background: "rgba(15,23,42,0.85)",
+              border: "1px solid #1e3a5f",
+              backdropFilter: "blur(6px)"
             }}
           >
             <div style={{ textAlign: "center", marginBottom: "1rem" }}>
               <div style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: 4 }}>YOUR CGPA</div>
-              <div style={{ fontSize: "3rem", fontWeight: 800, color: cgpaColor(result.cgpa) }}>
+              <div style={{
+                fontSize: "3rem",
+                fontWeight: 800,
+                color: cgpaColor(result.cgpa),
+                textShadow: "0 0 12px rgba(37,99,235,0.3)"
+              }}>
                 {result.cgpa}
               </div>
               <div style={{ fontSize: "0.8rem", color: "#64748b" }}>
@@ -142,12 +203,17 @@ export default function CGPA() {
             <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "0.75rem" }}>
               {result.breakdown.map((sub, i) => (
                 <div key={i} style={{
-                  display: "flex", justifyContent: "space-between",
-                  padding: "0.3rem 0", fontSize: "0.82rem", color: "#94a3b8",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "0.3rem 0",
+                  fontSize: "0.82rem",
+                  color: "#94a3b8",
                   borderBottom: i < result.breakdown.length - 1 ? "1px solid #0f172a" : "none"
                 }}>
                   <span>{sub.name || `Subject ${i + 1}`}</span>
-                  <span style={{ color: "#e2e8f0" }}>{sub.grade} · {sub.credits} cr · {sub.gp} pts</span>
+                  <span style={{ color: "#e2e8f0" }}>
+                    {sub.grade} · {sub.credits} cr · {sub.gp} pts
+                  </span>
                 </div>
               ))}
             </div>
