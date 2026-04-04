@@ -3,8 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { getUser, clearUser } from '../utils/storage'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faCalendarCheck, faGraduationCap, faBriefcase,
-  faMoon, faBookOpen, faRightFromBracket
+  faCalendarCheck,
+  faGraduationCap,
+  faBriefcase,
+  faMoon,
+  faBookOpen,
+  faRightFromBracket
 } from '@fortawesome/free-solid-svg-icons'
 import Attendance from '../components/Attendance'
 import CGPA from '../components/CGPA'
@@ -22,6 +26,7 @@ const TABS = [
 
 export default function Dashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('attendance')
+  const [hoveredTab, setHoveredTab] = useState(null)
   const user = getUser()
 
   function handleLogout() {
@@ -29,7 +34,7 @@ export default function Dashboard({ onLogout }) {
     onLogout()
   }
 
-  const tabComponents = {
+  const components = {
     attendance: <Attendance />,
     cgpa: <CGPA />,
     placement: <Placement />,
@@ -38,32 +43,88 @@ export default function Dashboard({ onLogout }) {
   }
 
   return (
-    <div className="dashboard-page">
-      <nav className="navbar">
-        <div className="navbar-left">
-          <span className="navbar-logo">StudentOS</span>
-          <span className="navbar-user">Hey, {user?.name} 👋</span>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#020817' }}>
+
+      {/* Topbar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0.9rem 2rem',
+        background: '#0f172a',
+        borderBottom: '1px solid #1e3a5f',
+        position: 'sticky', top: 0, zIndex: 100,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#93c5fd', letterSpacing: 0.5 }}>
+            StudentOS
+          </h2>
+          <span style={{
+            fontSize: '0.8rem', color: '#64748b',
+            background: '#020817', border: '1px solid #1e3a5f',
+            padding: '0.25rem 0.75rem', borderRadius: 99,
+          }}>
+            👋 {user?.name} · {user?.studentId}
+          </span>
         </div>
-        <button className="logout-btn" onClick={handleLogout}>
+
+        <button
+          onClick={handleLogout}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            background: 'transparent', border: '1px solid #1e3a5f',
+            color: '#94a3b8', padding: '0.4rem 1rem',
+            borderRadius: 8, fontSize: '0.85rem', cursor: 'pointer',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.borderColor = '#ef4444'
+            e.currentTarget.style.color = '#ef4444'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.borderColor = '#1e3a5f'
+            e.currentTarget.style.color = '#94a3b8'
+          }}
+        >
           <FontAwesomeIcon icon={faRightFromBracket} />
           Logout
         </button>
-      </nav>
-
-      <div className="tabs-bar">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            className={`tab-pill ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            <FontAwesomeIcon icon={tab.icon} />
-            {tab.label}
-          </button>
-        ))}
       </div>
 
-      <div className="tab-body">
+      {/* Tabs bar */}
+      <div style={{
+        display: 'flex', gap: '0.25rem',
+        padding: '0.65rem 2rem',
+        background: '#0f172a',
+        borderBottom: '1px solid #1e3a5f',
+        overflowX: 'auto',
+      }}>
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.id
+          const isHovered = hoveredTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              onMouseEnter={() => setHoveredTab(tab.id)}
+              onMouseLeave={() => setHoveredTab(null)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.45rem 1.1rem', borderRadius: 8,
+                background: isActive ? 'rgba(37,99,235,0.12)' : isHovered ? '#020817' : 'transparent',
+                border: isActive ? '1px solid rgba(37,99,235,0.3)' : isHovered ? '1px solid #1e3a5f' : '1px solid transparent',
+                color: isActive ? '#93c5fd' : isHovered ? '#e2e8f0' : '#64748b',
+                fontSize: '0.85rem', fontWeight: isActive ? 600 : 500,
+                cursor: 'pointer', whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <FontAwesomeIcon icon={tab.icon} />
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Tab content */}
+      <div style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -72,10 +133,11 @@ export default function Dashboard({ onLogout }) {
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.25 }}
           >
-            {tabComponents[activeTab]}
+            {components[activeTab]}
           </motion.div>
         </AnimatePresence>
       </div>
+
     </div>
   )
 }

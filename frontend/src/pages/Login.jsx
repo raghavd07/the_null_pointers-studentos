@@ -14,7 +14,7 @@ export default function Login({ onLogin }) {
       return
     }
     saveUser({ name: form.name.trim(), studentId: form.studentId.trim() })
-    onLogin()
+    onLogin({ name: form.name.trim(), studentId: form.studentId.trim() })
   }
 
   return (
