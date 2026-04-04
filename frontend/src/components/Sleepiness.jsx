@@ -103,7 +103,7 @@ export default function Sleepiness() {
         alignItems: "center",
         gap: "0.5rem"
       }}>
-        <FontAwesomeIcon icon={faBed} />
+        <FontAwesomeIcon icon={faBed} style={{ color: "#60a5fa" }} />
         Sleepiness & Stress Check
       </h2>
 
@@ -112,8 +112,8 @@ export default function Sleepiness() {
         {[
           { label: "Sleep Hours", key: "sleepHours" },
           { label: "Study Hours", key: "studyHours" },
-          { label: "Screen Time", key: "screenTime" },
-          { label: "Caffeine", key: "caffeineIntake" },
+          { label: "Total Screentime", key: "screenTime" },
+          { label: "Frequency of Caffiene products Intake" },
         ].map(({ label, key }) => (
           <div key={key}>
             <label style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{label}</label>
@@ -128,9 +128,20 @@ export default function Sleepiness() {
       </div>
 
       {/* Exercise */}
-      <div style={{ marginBottom: "1rem" }}>
-        <div style={{ display: "flex", gap: "0.75rem" }}>
-          {["yes", "no"].map(opt => (
+      {/* Exercise */}
+<div style={{ marginBottom: "1rem" }}>
+  
+  <label style={{
+    fontSize: "0.75rem",
+    color: "#94a3b8",
+    display: "block",
+    marginBottom: "6px"
+  }}>
+    Did you exercise today?
+  </label>
+
+  <div style={{ display: "flex", gap: "0.75rem" }}>
+          {["Yes", "No"].map(opt => (
             <button
               key={opt}
               onClick={() => setForm(f => ({ ...f, exercised: opt }))}
@@ -140,7 +151,9 @@ export default function Sleepiness() {
                 borderRadius: 8,
                 background: form.exercised === opt ? "#1d4ed8" : "#0f172a",
                 border: "1px solid #1e3a5f",
-                color: "#fff"
+                color: form.exercised === opt
+  ? (opt === "yes" ? "#22c55e" : "#ef4444")
+  : "#94a3b8"
               }}
             >
               <FontAwesomeIcon icon={opt === "yes" ? faCircleCheck : faCircleXmark} /> {opt}
@@ -170,7 +183,16 @@ export default function Sleepiness() {
                 color: "#fff"
               }}
             >
-              <FontAwesomeIcon icon={icon} /> {val}
+            <FontAwesomeIcon 
+  icon={icon} 
+  style={{
+    color:
+      val === "good" ? "#22c55e" :
+      val === "neutral" ? "#94a3b8" :
+      val === "tired" ? "#f59e0b" :
+      "#ef4444"
+  }}
+/> {val}
             </button>
           ))}
         </div>
@@ -221,7 +243,15 @@ export default function Sleepiness() {
                 transition={{ repeat: Infinity, duration: 1.2 }}
                 style={{ color: colors[result.level], fontSize: "1.5rem" }}
               >
-                <FontAwesomeIcon icon={faBed} />
+                <FontAwesomeIcon 
+  icon={faBed}
+  style={{
+    color:
+      result.level === "WELL RESTED" ? "#22c55e" :
+      result.level === "FATIGUED" ? "#f59e0b" :
+      "#ef4444"
+  }}
+/>
               </motion.div>
 
               <div style={{ fontSize: "1.6rem", fontWeight: 800, color: colors[result.level] }}>
