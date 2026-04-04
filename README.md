@@ -69,7 +69,7 @@ create ```.env```
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/studentOS
 GROQ_API_KEY=your_groq_api_key
-JWT_SECRET=your_secret
+JWT_SECRET=supersecretkey
 ```
 ##### Please create a Groq api key by clicking [here](https://console.groq.com/keys)
 ### 3. Setup Frontend
