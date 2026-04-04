@@ -70,13 +70,13 @@ export default function Sleepiness() {
     let level, advice;
     if (score >= 70) {
       level = "BURNOUT RISK";
-      advice = "You're running on fumes. Sleep is non-negotiable — aim for 7–8 hrs tonight. Drop screen time and take breaks every 45 mins.";
+      advice = "You're running on fumes. Sleep is non-negotiable — aim for 7–8 hrs tonight. Reduce screen time and take breaks.";
     } else if (score >= 45) {
       level = "FATIGUED";
-      advice = "You're pushing it. Try a 20-min nap, reduce caffeine after 3pm, and get off screens an hour before bed.";
+      advice = "You're pushing it. Try a short nap, reduce caffeine after evening, and avoid screens before sleep.";
     } else {
       level = "WELL RESTED";
-      advice = "You're in good shape! Keep the sleep schedule consistent and stay hydrated.";
+      advice = "You're doing well. Maintain consistency and stay hydrated.";
     }
 
     const data = { ...form, score, level, advice };
@@ -92,7 +92,7 @@ export default function Sleepiness() {
 
   return (
     <div style={{ maxWidth: 540, margin: "0 auto", padding: "1.5rem 0" }}>
-      
+
       {/* Header */}
       <h2 style={{
         color: "#93c5fd",
@@ -112,11 +112,13 @@ export default function Sleepiness() {
         {[
           { label: "Sleep Hours", key: "sleepHours" },
           { label: "Study Hours", key: "studyHours" },
-          { label: "Total Screentime", key: "screenTime" },
-          { label: "Frequency of Caffiene products Intake" },
+          { label: "Screen Time (hrs)", key: "screenTime" },
+          { label: "Caffeine Intake", key: "caffeineIntake" },
         ].map(({ label, key }) => (
           <div key={key}>
-            <label style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{label}</label>
+            <label style={{ fontSize: "0.75rem", color: "#94a3b8", marginBottom: 4, display: "block" }}>
+              {label}
+            </label>
             <input
               type="number"
               value={form[key]}
@@ -128,20 +130,13 @@ export default function Sleepiness() {
       </div>
 
       {/* Exercise */}
-      {/* Exercise */}
-<div style={{ marginBottom: "1rem" }}>
-  
-  <label style={{
-    fontSize: "0.75rem",
-    color: "#94a3b8",
-    display: "block",
-    marginBottom: "6px"
-  }}>
-    Did you exercise today?
-  </label>
+      <div style={{ marginBottom: "1rem" }}>
+        <label style={{ fontSize: "0.75rem", color: "#94a3b8", marginBottom: 6, display: "block" }}>
+          Did you exercise today?
+        </label>
 
-  <div style={{ display: "flex", gap: "0.75rem" }}>
-          {["Yes", "No"].map(opt => (
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          {["yes", "no"].map(opt => (
             <button
               key={opt}
               onClick={() => setForm(f => ({ ...f, exercised: opt }))}
@@ -152,8 +147,8 @@ export default function Sleepiness() {
                 background: form.exercised === opt ? "#1d4ed8" : "#0f172a",
                 border: "1px solid #1e3a5f",
                 color: form.exercised === opt
-  ? (opt === "yes" ? "#22c55e" : "#ef4444")
-  : "#94a3b8"
+                  ? (opt === "yes" ? "#22c55e" : "#ef4444")
+                  : "#94a3b8"
               }}
             >
               <FontAwesomeIcon icon={opt === "yes" ? faCircleCheck : faCircleXmark} /> {opt}
@@ -164,6 +159,10 @@ export default function Sleepiness() {
 
       {/* Mood */}
       <div style={{ marginBottom: "1.5rem" }}>
+        <label style={{ fontSize: "0.75rem", color: "#94a3b8", marginBottom: 6, display: "block" }}>
+          Current Mood
+        </label>
+
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {[
             { val: "good", icon: faFaceSmile },
@@ -183,16 +182,16 @@ export default function Sleepiness() {
                 color: "#fff"
               }}
             >
-            <FontAwesomeIcon 
-  icon={icon} 
-  style={{
-    color:
-      val === "good" ? "#22c55e" :
-      val === "neutral" ? "#94a3b8" :
-      val === "tired" ? "#f59e0b" :
-      "#ef4444"
-  }}
-/> {val}
+              <FontAwesomeIcon
+                icon={icon}
+                style={{
+                  color:
+                    val === "good" ? "#22c55e" :
+                    val === "neutral" ? "#94a3b8" :
+                    val === "tired" ? "#f59e0b" :
+                    "#ef4444"
+                }}
+              /> {val}
             </button>
           ))}
         </div>
@@ -220,46 +219,23 @@ export default function Sleepiness() {
       <AnimatePresence>
         {result && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             style={{
               borderRadius: 16,
               padding: "1.5rem",
               marginTop: "1.2rem",
               background: `linear-gradient(135deg, ${colors[result.level]}22, #020817)`,
               border: `1px solid ${colors[result.level]}55`,
-              boxShadow: `0 0 25px ${colors[result.level]}33`,
             }}
           >
-            {/* Top */}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: result.level === "BURNOUT RISK" ? [0, -10, 10, 0] : 0
-                }}
-                transition={{ repeat: Infinity, duration: 1.2 }}
-                style={{ color: colors[result.level], fontSize: "1.5rem" }}
-              >
-                <FontAwesomeIcon 
-  icon={faBed}
-  style={{
-    color:
-      result.level === "WELL RESTED" ? "#22c55e" :
-      result.level === "FATIGUED" ? "#f59e0b" :
-      "#ef4444"
-  }}
-/>
-              </motion.div>
-
+              <FontAwesomeIcon icon={faBed} style={{ color: colors[result.level] }} />
               <div style={{ fontSize: "1.6rem", fontWeight: 800, color: colors[result.level] }}>
                 {result.score}/100
               </div>
             </div>
 
-            {/* Bar */}
             <div style={{
               height: 10,
               borderRadius: 999,
@@ -270,16 +246,13 @@ export default function Sleepiness() {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${result.score}%` }}
-                transition={{ duration: 1 }}
                 style={{
                   height: "100%",
-                  background: colors[result.level],
-                  boxShadow: `0 0 10px ${colors[result.level]}`
+                  background: colors[result.level]
                 }}
               />
             </div>
 
-            {/* Level */}
             <div style={{
               display: "inline-block",
               background: colors[result.level],
@@ -292,7 +265,6 @@ export default function Sleepiness() {
               {result.level}
             </div>
 
-            {/* Advice */}
             <p style={{ color: "#cbd5e1", lineHeight: 1.7 }}>
               {result.advice}
             </p>

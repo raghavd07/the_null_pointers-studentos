@@ -20,7 +20,16 @@ export default function StudyPlan() {
     const cgpa = JSON.parse(localStorage.getItem("studentos_cgpa") || "{}");
     const placement = JSON.parse(localStorage.getItem("studentos_placement") || "{}");
     const sleepiness = JSON.parse(localStorage.getItem("studentos_sleepiness") || "{}");
-    return { user, attendance, cgpa, placement, sleepiness };
+
+    // ✅ safe subjects extraction
+    const subjects = Array.isArray(cgpa.breakdown)
+      ? cgpa.breakdown.map(s => ({
+          name: s.name,
+          expectedGrade: s.grade
+        }))
+      : [];
+
+    return { user, attendance, cgpa, placement, sleepiness, subjects };
   };
 
   const generate = async () => {
@@ -38,7 +47,18 @@ export default function StudyPlan() {
       });
 
       const json = await res.json();
-      setPlan(json.plan || json.message || "No plan returned.");
+
+      // ✅ 🔥 MAIN FIX HERE
+      if (json?.studyPlan) {
+        setPlan(json.studyPlan);
+      } else if (json?.plan) {
+        setPlan(json.plan);
+      } else if (json?.message) {
+        setPlan(json.message);
+      } else {
+        setPlan("⚠️ Unable to generate plan. Try again.");
+      }
+
     } catch (e) {
       setError("Could not reach backend. Make sure the server is running on port 5000.");
     }
@@ -94,88 +114,72 @@ export default function StudyPlan() {
     <div style={{ maxWidth: 600, margin: "0 auto", padding: "1.5rem 0" }}>
       
       {/* Header */}
-      <h2
-        style={{
-          color: "#93c5fd",
-          fontWeight: 700,
-          fontSize: "1.3rem",
-          marginBottom: "0.5rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-        }}
-      >
+      <h2 style={{
+        color: "#93c5fd",
+        fontWeight: 700,
+        fontSize: "1.3rem",
+        marginBottom: "0.5rem",
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+      }}>
         <FontAwesomeIcon icon={faBookOpen} style={{ color: "#60a5fa" }} />
         AI Study Plan
       </h2>
 
       <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
-        Pulls all your saved module data and generates a personalised plan via Groq AI.
+        Generates a personalised study plan using your academic data.
       </p>
 
       {/* Stat Cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "0.75rem",
-          marginBottom: "1.5rem",
-        }}
-      >
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "0.75rem",
+        marginBottom: "1.5rem",
+      }}>
         {statCards.map(({ label, value, status, colors, icon }) => (
-          <div
-            key={label}
-            style={{
-              borderRadius: 10,
-              padding: "0.9rem 1rem",
-              background: "#0f172a",
-              border: "1px solid #1e3a5f",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                marginBottom: 4,
-              }}
-            >
+          <div key={label} style={{
+            borderRadius: 10,
+            padding: "0.9rem 1rem",
+            background: "#0f172a",
+            border: "1px solid #1e3a5f",
+          }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginBottom: 4,
+            }}>
               <FontAwesomeIcon
                 icon={icon}
                 style={{
                   color: status && colors ? colors[status] : "#60a5fa",
                 }}
               />
-              <span
-                style={{
-                  fontSize: "0.7rem",
-                  color: "#64748b",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                }}
-              >
+              <span style={{
+                fontSize: "0.7rem",
+                color: "#64748b",
+                textTransform: "uppercase",
+              }}>
                 {label}
               </span>
             </div>
 
-            <div
-              style={{
-                fontSize: "1.3rem",
-                fontWeight: 700,
-                color: status && colors ? colors[status] : "#e2e8f0",
-              }}
-            >
+            <div style={{
+              fontSize: "1.3rem",
+              fontWeight: 700,
+              color: status && colors ? colors[status] : "#e2e8f0",
+            }}>
               {value}
             </div>
 
             {status && (
-              <div
-                style={{
-                  fontSize: "0.68rem",
-                  color: colors[status],
-                  marginTop: 2,
-                }}
-              >
+              <div style={{
+                fontSize: "0.68rem",
+                color: colors[status],
+                marginTop: 2,
+              }}>
                 {status}
               </div>
             )}
@@ -185,19 +189,16 @@ export default function StudyPlan() {
 
       {/* Warning */}
       {!hasData && (
-        <div
-          style={{
-            borderRadius: 10,
-            padding: "1rem",
-            marginBottom: "1.5rem",
-            background: "rgba(245,158,11,0.08)",
-            border: "1px solid rgba(245,158,11,0.2)",
-            color: "#f59e0b",
-            fontSize: "0.85rem",
-          }}
-        >
-          <FontAwesomeIcon icon={faTriangleExclamation} /> No module data found.
-          Fill Attendance, CGPA, Placement, and Sleepiness first.
+        <div style={{
+          borderRadius: 10,
+          padding: "1rem",
+          marginBottom: "1.5rem",
+          background: "rgba(245,158,11,0.08)",
+          border: "1px solid rgba(245,158,11,0.2)",
+          color: "#f59e0b",
+          fontSize: "0.85rem",
+        }}>
+          <FontAwesomeIcon icon={faTriangleExclamation} /> Fill modules first for better results.
         </div>
       )}
 
@@ -210,79 +211,51 @@ export default function StudyPlan() {
           width: "100%",
           padding: "0.8rem",
           borderRadius: 8,
-          background: loading
-            ? "#1e3a5f"
-            : "linear-gradient(135deg, #1d4ed8, #2563eb)",
+          background: loading ? "#1e3a5f" : "linear-gradient(135deg, #1d4ed8, #2563eb)",
           color: "#fff",
           fontWeight: 600,
           border: "none",
           cursor: loading ? "not-allowed" : "pointer",
-          fontSize: "0.95rem",
-          marginBottom: "1.5rem",
           display: "flex",
-          alignItems: "center",
           justifyContent: "center",
           gap: "0.5rem",
         }}
       >
         <FontAwesomeIcon icon={faWandMagicSparkles} />
-        {loading ? "Generating Plan..." : "Generate My Study Plan"}
+        {loading ? "Generating..." : "Generate My Study Plan"}
       </motion.button>
 
-      {/* Error */}
-      {error && (
-        <div
-          style={{
-            borderRadius: 10,
-            padding: "1rem",
-            marginBottom: "1rem",
-            background: "rgba(239,68,68,0.08)",
-            border: "1px solid rgba(239,68,68,0.2)",
-            color: "#ef4444",
-            fontSize: "0.85rem",
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {/* Plan Output */}
+      {/* Output */}
       <AnimatePresence>
         {plan && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
             style={{
               borderRadius: 12,
               padding: "1.5rem",
+              marginTop: "1.5rem",
               background: "rgba(15,23,42,0.9)",
               border: "1px solid #1e3a5f",
             }}
           >
-            <div
-              style={{
-                fontSize: "0.72rem",
-                color: "#64748b",
-                marginBottom: "0.75rem",
-                letterSpacing: 1,
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem",
-              }}
-            >
+            <div style={{
+              fontSize: "0.72rem",
+              color: "#64748b",
+              marginBottom: "0.75rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+            }}>
               <FontAwesomeIcon icon={faWandMagicSparkles} style={{ color: "#f59e0b" }} />
-              YOUR PERSONALISED PLAN (GROQ AI)
+              YOUR PLAN
             </div>
 
-            <div
-              style={{
-                color: "#cbd5e1",
-                fontSize: "0.9rem",
-                lineHeight: 1.75,
-                whiteSpace: "pre-wrap",
-              }}
-            >
+            <div style={{
+              color: "#cbd5e1",
+              lineHeight: 1.7,
+              whiteSpace: "pre-wrap",
+            }}>
               {plan}
             </div>
           </motion.div>
