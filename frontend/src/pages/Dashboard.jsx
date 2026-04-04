@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getUser, clearUser } from '../utils/storage'
 
-import Navbar from '../components/Navbar'
+import Navbar from '../components/NavBar'
 
 import Attendance from '../components/Attendance'
 import CGPA from '../components/CGPA'
@@ -12,8 +12,16 @@ import StudyPlan from '../components/StudyPlan'
 
 export default function Dashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('attendance')
-  const user = getUser()
+  
 
+  const user = getUser(); // or from backend response
+
+<Navbar
+  user={user}
+  activeTab={activeTab}
+  setActiveTab={setActiveTab}
+  onLogout={handleLogout}
+/>
   function handleLogout() {
     clearUser()
     onLogout()
@@ -28,9 +36,13 @@ export default function Dashboard({ onLogout }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#020817' }}>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: '#020817'
+    }}>
 
-      {/* ✅ Navbar (Topbar + Tabs moved here) */}
       <Navbar
         user={user}
         activeTab={activeTab}
@@ -38,21 +50,59 @@ export default function Dashboard({ onLogout }) {
         onLogout={handleLogout}
       />
 
-      {/* Tab content */}
-      <div style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.25 }}
-          >
-            {components[activeTab]}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      {/* 🔥 MAIN CONTENT */}
+      <div style={{
+        flex: 1,
+        padding: '2.5rem 2rem',
+        maxWidth: '1100px',
+        width: '100%',
+        margin: '0 auto'
+      }}>
 
+        {/* ✨ PAGE HEADER */}
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{
+            fontSize: '1.6rem',
+            fontWeight: 700,
+            color: '#bfdbfe',
+            marginBottom: '0.3rem'
+          }}>
+            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+          </h1>
+
+          <p style={{
+            fontSize: '0.9rem',
+            color: '#64748b'
+          }}>
+            Manage and track your academic performance.
+          </p>
+        </div>
+
+        {/* 🧊 CONTENT CARD WRAPPER */}
+        <div style={{
+          background: "rgba(15, 23, 42, 0.6)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(59,130,246,0.2)",
+          borderRadius: 16,
+          padding: "1.5rem",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.4)"
+        }}>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              {components[activeTab]}
+            </motion.div>
+          </AnimatePresence>
+
+        </div>
+
+      </div>
     </div>
   )
 }

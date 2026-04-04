@@ -16,6 +16,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 // Routes
+app.use('/auth', require('./routes/auth'));
 app.use('/analyze-student', require('./routes/analyze'));
 app.use('/generate-plan', require('./routes/plan'));
 app.use('/predict-risk', require('./routes/risk'));

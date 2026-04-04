@@ -11,10 +11,8 @@ export function saveUser(data) {
 }
 
 export function getUser() {
-  const data = localStorage.getItem(KEYS.user)
-  return data ? JSON.parse(data) : null
+  return JSON.parse(localStorage.getItem("studentos_user") || "{}");
 }
-
 export function clearUser() {
   localStorage.removeItem(KEYS.user)
 }
@@ -64,3 +62,4 @@ export function getAllStudentData() {
     sleepiness: getSleepiness(),
   }
 }
+

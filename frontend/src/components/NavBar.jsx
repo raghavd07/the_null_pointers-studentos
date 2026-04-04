@@ -22,20 +22,22 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout }) {
 
   return (
     <>
-      {/* Topbar */}
+      {/* 🔥 Topbar */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0.9rem 2rem",
-          background: "#0f172a",
-          borderBottom: "1px solid #1e3a5f",
+          backdropFilter: "blur(12px)",
+          background: "rgba(15, 23, 42, 0.7)",
+          borderBottom: "1px solid rgba(59,130,246,0.2)",
           position: "sticky",
           top: 0,
           zIndex: 100,
         }}
       >
+        {/* Left */}
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <h2
             style={{
@@ -51,17 +53,18 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout }) {
           <span
             style={{
               fontSize: "0.8rem",
-              color: "#64748b",
-              background: "#020817",
-              border: "1px solid #1e3a5f",
+              color: "#94a3b8",
+              background: "rgba(2,6,23,0.6)",
+              border: "1px solid rgba(59,130,246,0.2)",
               padding: "0.25rem 0.75rem",
               borderRadius: 99,
             }}
           >
-            👋 {user?.name} · {user?.studentId}
+            Hello {user?.name || "Student"} {user?.studentId ? `· ${user.studentId}` : ""}
           </span>
         </div>
 
+        {/* Logout */}
         <button
           onClick={onLogout}
           style={{
@@ -69,19 +72,20 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout }) {
             alignItems: "center",
             gap: "0.5rem",
             background: "transparent",
-            border: "1px solid #1e3a5f",
+            border: "1px solid rgba(59,130,246,0.2)",
             color: "#94a3b8",
             padding: "0.4rem 1rem",
             borderRadius: 8,
             fontSize: "0.85rem",
             cursor: "pointer",
+            transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = "#ef4444";
             e.currentTarget.style.color = "#ef4444";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = "#1e3a5f";
+            e.currentTarget.style.borderColor = "rgba(59,130,246,0.2)";
             e.currentTarget.style.color = "#94a3b8";
           }}
         >
@@ -90,14 +94,14 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout }) {
         </button>
       </div>
 
-      {/* Tabs */}
+      {/* 🔥 Tabs */}
       <div
         style={{
           display: "flex",
-          gap: "0.25rem",
-          padding: "0.65rem 2rem",
-          background: "#0f172a",
-          borderBottom: "1px solid #1e3a5f",
+          gap: "0.4rem",
+          padding: "0.6rem 2rem",
+          background: "rgba(15, 23, 42, 0.6)",
+          borderBottom: "1px solid rgba(59,130,246,0.2)",
           overflowX: "auto",
         }}
       >
@@ -116,27 +120,31 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout }) {
                 alignItems: "center",
                 gap: "0.5rem",
                 padding: "0.45rem 1.1rem",
-                borderRadius: 8,
+                borderRadius: 10,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+
                 background: isActive
-                  ? "rgba(37,99,235,0.12)"
+                  ? "rgba(59,130,246,0.15)"
                   : isHovered
-                  ? "#020817"
+                  ? "rgba(2,6,23,0.8)"
                   : "transparent",
+
                 border: isActive
-                  ? "1px solid rgba(37,99,235,0.3)"
+                  ? "1px solid rgba(59,130,246,0.35)"
                   : isHovered
-                  ? "1px solid #1e3a5f"
+                  ? "1px solid rgba(59,130,246,0.2)"
                   : "1px solid transparent",
+
                 color: isActive
                   ? "#93c5fd"
                   : isHovered
                   ? "#e2e8f0"
                   : "#64748b",
+
                 fontSize: "0.85rem",
                 fontWeight: isActive ? 600 : 500,
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                transition: "all 0.15s ease",
+                transition: "all 0.2s ease",
               }}
             >
               <FontAwesomeIcon icon={tab.icon} />
