@@ -50,4 +50,4 @@ function calculateStress({ studyHoursPerDay, sleepHoursPerDay, daysToExam, atten
   };
 }
 
-module.exports = { calculateStress };
+module.exports = { calculateStress }; 

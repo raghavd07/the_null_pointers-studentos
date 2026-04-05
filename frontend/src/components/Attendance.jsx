@@ -5,7 +5,8 @@ import {
   faCalendarCheck,
   faCheckCircle,
   faTriangleExclamation,
-  faCircleExclamation
+  faCircleExclamation,
+  faBan
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function Attendance() {
@@ -17,19 +18,48 @@ export default function Attendance() {
   });
 
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
   const calculate = () => {
+    setError("");
     const attended = parseInt(form.attended);
     const total = parseInt(form.total);
     const upcoming = parseInt(form.upcoming);
     const target = parseFloat(form.target) / 100;
 
-    if (isNaN(attended) || isNaN(total) || isNaN(upcoming)) return;
+    if (isNaN(attended) || isNaN(total) || isNaN(upcoming)) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (attended > total) {
+      setError("Classes attended cannot be greater than total classes conducted.");
+      setResult(null);
+      return;
+    }
+
+    if (total === 0) {
+      setError("Total classes cannot be zero.");
+      setResult(null);
+      return;
+    }
+
+    if (attended < 0 || total < 0 || upcoming < 0) {
+      setError("Values cannot be negative.");
+      setResult(null);
+      return;
+    }
+
+    if (parseFloat(form.target) <= 0 || parseFloat(form.target) > 100) {
+      setError("Target must be between 1 and 100.");
+      setResult(null);
+      return;
+    }
 
     const currentPct = (attended / total) * 100;
     const diff = currentPct - parseFloat(form.target);
 
-    let status, message, count;
+    let status, message, count, achievable = true;
 
     if (diff >= 5) {
       status = "SAFE";
@@ -38,21 +68,28 @@ export default function Attendance() {
     } else if (diff >= 0) {
       status = "WARNING";
       count = Math.floor(attended / target - total);
-      message = `Thin margin — only ${count} class${count !== 1 ? "es" : ""} to spare. Stay regular.`;
+      count = Math.max(0, count);
+      message = count === 0
+        ? `You are right at the edge. Do NOT miss any more classes.`
+        : `Thin margin — only ${count} class${count !== 1 ? "es" : ""} to spare. Stay regular.`;
     } else {
       status = "CRITICAL";
       count = Math.ceil((target * total - attended) / (1 - target));
-      message = `Attend next ${count} consecutive class${count !== 1 ? "es" : ""} to recover.`;
+
+      if (count > upcoming) {
+        achievable = false;
+        status = "IMPOSSIBLE";
+        message = `Target of ${form.target}% cannot be achieved. You need ${count} consecutive classes but only ${upcoming} remain this semester.`;
+      } else {
+        message = `Attend next ${count} consecutive class${count !== 1 ? "es" : ""} to recover.`;
+      }
     }
 
     const data = {
-      attended,
-      total,
-      upcoming,
+      attended, total, upcoming,
       target: form.target,
-      status,
-      message,
-      count,
+      status, message, count,
+      achievable,
       currentPct: currentPct.toFixed(1),
     };
 
@@ -63,13 +100,15 @@ export default function Attendance() {
   const colors = {
     SAFE: "#22c55e",
     WARNING: "#f59e0b",
-    CRITICAL: "#ef4444"
+    CRITICAL: "#ef4444",
+    IMPOSSIBLE: "#a855f7"
   };
 
   const icons = {
     SAFE: faCheckCircle,
     WARNING: faTriangleExclamation,
-    CRITICAL: faCircleExclamation
+    CRITICAL: faCircleExclamation,
+    IMPOSSIBLE: faBan
   };
 
   const inputStyle = {
@@ -135,6 +174,21 @@ export default function Attendance() {
         ))}
       </div>
 
+      {/* Validation Error */}
+      {error && (
+        <div style={{
+          borderRadius: 10,
+          padding: "0.75rem 1rem",
+          background: "rgba(239,68,68,0.08)",
+          border: "1px solid rgba(239,68,68,0.3)",
+          color: "#ef4444",
+          fontSize: "0.85rem",
+          marginBottom: "1rem",
+        }}>
+          ⚠️ {error}
+        </div>
+      )}
+
       {/* Button */}
       <motion.button
         whileTap={{ scale: 0.96 }}
@@ -169,7 +223,6 @@ export default function Attendance() {
               border: `1px solid ${colors[result.status]}40`,
             }}
           >
-
             {/* Status Row */}
             <div style={{
               display: "flex",
@@ -203,7 +256,7 @@ export default function Attendance() {
             }}>
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${result.currentPct}%` }}
+                animate={{ width: `${Math.min(result.currentPct, 100)}%` }}
                 transition={{ duration: 0.8 }}
                 style={{
                   height: "100%",
@@ -217,7 +270,8 @@ export default function Attendance() {
               color: colors[result.status],
               fontWeight: 600,
               fontSize: "0.95rem",
-              margin: 0
+              margin: 0,
+              lineHeight: 1.6
             }}>
               {result.message}
             </p>

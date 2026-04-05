@@ -1,4 +1,4 @@
-function analyzeAttendance({ attendedClasses, totalClasses, targetAttendance }) {
+function analyzeAttendance({ attendedClasses, totalClasses, targetAttendance, upcomingClasses }) {
   if (totalClasses === 0) {
     return { error: 'No classes recorded yet' };
   }
@@ -11,27 +11,34 @@ function analyzeAttendance({ attendedClasses, totalClasses, targetAttendance }) 
 
   if (buffer >= 5) {
     status = 'SAFE';
-    // Formula: (attended / (total + x)) >= target/100
-    // Solving for x: x <= (attended / (target/100)) - total
+
     classesCanMiss = Math.floor(attendedClasses / (target / 100) - totalClasses);
+
     message = `You can afford to miss ${classesCanMiss} more class${classesCanMiss !== 1 ? 'es' : ''} and still stay above your ${target}% target.`;
 
   } else if (buffer >= 0 && buffer < 5) {
     status = 'WARNING';
+
     classesCanMiss = Math.floor(attendedClasses / (target / 100) - totalClasses);
     classesCanMiss = Math.max(0, classesCanMiss);
+
     message = classesCanMiss === 0
       ? `You are right at the edge. Do NOT miss any more classes.`
       : `Warning: You can only miss ${classesCanMiss} more class${classesCanMiss !== 1 ? 'es' : ''}. Stay cautious.`;
 
   } else {
     status = 'CRITICAL';
-    // Formula: (attended + x) / (total + x) >= target/100
-    // Solving for x: x >= [(target/100)*total - attended] / (1 - target/100)
+
     const numerator = (target / 100) * totalClasses - attendedClasses;
     const denominator = 1 - (target / 100);
     classesToAttend = Math.ceil(numerator / denominator);
-    message = `You must attend the next ${classesToAttend} consecutive class${classesToAttend !== 1 ? 'es' : ''} to reach your ${target}% target.`;
+
+    // 🔥 NEW FIX HERE
+    if (upcomingClasses !== undefined && classesToAttend > upcomingClasses) {
+      message = `Target ${target}% cannot be achieved. Even if you attend all ${upcomingClasses} upcoming classes, you will still fall short.`;
+    } else {
+      message = `You must attend the next ${classesToAttend} consecutive class${classesToAttend !== 1 ? 'es' : ''} to reach your ${target}% target.`;
+    }
   }
 
   return {

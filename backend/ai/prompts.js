@@ -87,8 +87,9 @@ Projected CGPA: ${cgpa.projectedCGPA ?? "N/A"}
 Subjects: ${subjectsText}
 
 == RULES ==
+- If subject is invalid, directly and strictly in one line, give the output something like "invalid subject name. please re enter subject name"(not exactly this) and ignore the other rules
 - Prioritize subjects where expected grade is low (C or F)
-- Include breaks and sleep reminders
+- Include breaks and sleep reminders, and suggest topics from the subject which are high scoring.
 - Be realistic, not perfect
 - Format as Day 1, Day 2... Day 7
 - Each day should have morning, afternoon, evening slots

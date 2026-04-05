@@ -6,10 +6,8 @@ import {
   faMoon,
   faBookOpen
 } from "@fortawesome/free-solid-svg-icons";
-import { faChartSimple } from "@fortawesome/free-solid-svg-icons";
 
 const TABS = [
-    { id: "dashboard", label: "Dashboard", icon: faChartSimple },
   { id: "attendance", label: "Attendance", icon: faCalendarCheck },
   { id: "cgpa", label: "CGPA", icon: faGraduationCap },
   { id: "placement", label: "Placement", icon: faBriefcase },
@@ -19,11 +17,7 @@ const TABS = [
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   return (
-    <div className="sidebar" style={{
-  width: "240px",
-  minHeight: "100vh",
-  flexShrink: 0
-}}>
+    <div className="sidebar">
 
       {/* Logo */}
       <h2 style={{
